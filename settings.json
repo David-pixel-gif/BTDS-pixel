@@ -1,0 +1,21 @@
+{
+    // Path to the Python interpreter in your virtual environment
+    "python.pythonPath": "C:/Users/PHOENIX/Desktop/my project 1/venv/Scripts/python.exe",
+
+    // Pylance extra paths to help it locate packages in the virtual environment
+    "python.analysis.extraPaths": [
+        "C:/Users/PHOENIX/Desktop/my project 1/venv/Lib/site-packages"
+    ],
+
+    // Specify the base folder where virtual environments are stored
+    "python.venvPath": "C:/Users/PHOENIX/Desktop/my project 1/venv",
+
+    // Set Pylance as the language server and enable missing import diagnostics
+    "python.languageServer": "Pylance",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "warning"
+    },
+
+    // Optional: Enable auto-imports for missing imports
+    "python.analysis.autoImportCompletions": true
+}

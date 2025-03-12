@@ -1,0 +1,26 @@
+# Ignore Python virtual environment
+flaskApp/myenv_opinion/
+flaskApp/venv/
+
+# Ignore datasets and instance folders
+flaskApp/instance/
+flaskApp/datasets/
+
+# Ignore compiled Python files
+__pycache__/
+*.py[cod]
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Node.js dependencies
+node_modules/
+npm-debug.log
+
+# Ignore environment files
+.env
+*.sqlite3

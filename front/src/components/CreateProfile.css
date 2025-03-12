@@ -1,0 +1,34 @@
+/* CreateProfile.css */
+.container {
+    max-width: 600px;
+  }
+  
+  .profile-box {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 40px;
+  }
+  
+  .form-control-file {
+    display: block;
+    margin: 0 auto;
+  }
+  
+  .form-select,
+  .form-control {
+    padding: 15px;
+    font-size: 1rem;
+  }
+  
+  h2 {
+    font-weight: 700;
+    color: #333;
+  }
+  
+  button {
+    background-color: #007bff;
+    border: none;
+    font-size: 1.2rem;
+    padding: 10px;
+  }
+  

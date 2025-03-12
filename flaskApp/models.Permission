@@ -1,0 +1,1 @@
+permissions = db.relationship('models.Permission', secondary='role_permissions', backref='roles')
