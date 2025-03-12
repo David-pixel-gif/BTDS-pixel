@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Ignore Python virtual environment
 flaskApp/myenv_opinion/
 flaskApp/venv/
@@ -24,3 +25,29 @@ npm-debug.log
 # Ignore environment files
 .env
 *.sqlite3
+=======
+# Ignore virtual environments
+venv/
+
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore compiled Python files
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+>>>>>>> 7c80729d46ce37fc46598505d2d744e84b740cc2
