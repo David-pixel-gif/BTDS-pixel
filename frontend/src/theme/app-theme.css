@@ -1,0 +1,267 @@
+.app-shell,
+.app-shell * {
+  box-sizing: border-box;
+}
+
+.app-shell__main {
+  color: var(--theme-navy);
+  font-family: var(--theme-font-sans);
+  animation: app-page-enter 0.4s ease;
+}
+
+.app-shell__main h1,
+.app-shell__main h2,
+.app-shell__main h3,
+.app-shell__main h4,
+.app-shell__main h5 {
+  color: var(--theme-navy);
+  font-family: var(--theme-font-serif);
+  font-weight: 700;
+}
+
+.app-shell__main h6,
+.app-shell__main .card-title {
+  font-family: var(--theme-font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.app-shell__main p,
+.app-shell__main small,
+.app-shell__main label,
+.app-shell__main span,
+.app-shell__main li,
+.app-shell__main td,
+.app-shell__main th,
+.app-shell__main input,
+.app-shell__main textarea,
+.app-shell__main select,
+.app-shell__main button {
+  font-family: var(--theme-font-sans);
+}
+
+.app-shell__main p,
+.app-shell__main .text-muted,
+.app-shell__main .card-text {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.app-shell__main .container,
+.app-shell__main .container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.app-shell__main .vh-100 {
+  height: auto !important;
+  min-height: auto !important;
+}
+
+.app-shell__main .card,
+.app-shell__main .modal-content,
+.app-shell__main .accordion-item,
+.app-shell__main .table-responsive {
+  border: 1px solid var(--theme-border);
+  border-radius: 1.1rem;
+  background: var(--theme-white);
+  box-shadow: 0 2px 12px rgba(16, 39, 59, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-shell__main .card,
+.app-shell__main .accordion-item,
+.app-shell__main .modal-content {
+  overflow: hidden;
+}
+
+.app-shell__main .card:hover,
+.app-shell__main .table-responsive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(16, 39, 59, 0.09);
+}
+
+.app-shell__main .card-header,
+.app-shell__main .card > .card-header,
+.app-shell__main .card-header,
+.app-shell__main .accordion-button:not(.collapsed) {
+  padding: 0.9rem 1.1rem;
+  background: var(--theme-white);
+  color: var(--theme-navy);
+  border-bottom: 1px solid var(--theme-border);
+}
+
+.app-shell__main .accordion-button {
+  padding: 0.95rem 1.1rem;
+  font-weight: 700;
+  color: var(--theme-navy);
+  background: var(--theme-white);
+}
+
+.app-shell__main .accordion-button:focus,
+.app-shell__main .btn:focus,
+.app-shell__main .form-control:focus,
+.app-shell__main .form-select:focus {
+  box-shadow: 0 0 0 0.22rem rgba(10, 123, 110, 0.14);
+  border-color: rgba(10, 123, 110, 0.35);
+}
+
+.app-shell__main .btn-primary {
+  background: var(--theme-teal);
+  border-color: var(--theme-teal);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 16px rgba(10, 123, 110, 0.22);
+  font-weight: 600;
+}
+
+.app-shell__main .btn-primary:hover,
+.app-shell__main .btn-primary:active {
+  background: var(--theme-teal-dark);
+  border-color: var(--theme-teal-dark);
+}
+
+.app-shell__main .btn-outline-primary {
+  color: var(--theme-teal-dark);
+  border-color: rgba(10, 123, 110, 0.3);
+  border-radius: 0.75rem;
+}
+
+.app-shell__main .btn-outline-primary:hover {
+  background: var(--theme-teal-soft);
+  color: var(--theme-teal-dark);
+  border-color: var(--theme-teal);
+}
+
+.app-shell__main .btn:disabled,
+.app-shell__main .btn.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.app-shell__main .form-control,
+.app-shell__main .form-select,
+.app-shell__main .input-group-text {
+  border-radius: 10px;
+  border-width: 1.5px;
+  border-color: var(--theme-border);
+  background: var(--theme-white);
+}
+
+.app-shell__main .table {
+  margin-bottom: 0;
+  color: var(--theme-navy);
+}
+
+.app-shell__main .table thead th {
+  background: linear-gradient(180deg, rgba(231, 246, 243, 0.65), rgba(255, 255, 255, 0.98));
+  color: var(--theme-slate);
+  border-bottom-color: var(--theme-border);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.app-shell__main .table > :not(caption) > * > * {
+  padding: 0.95rem 1rem;
+  border-bottom-color: rgba(217, 235, 231, 0.9);
+}
+
+.app-shell__main .badge {
+  border-radius: 999px;
+  padding: 0.48rem 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+
+.app-shell__main .badge.bg-primary,
+.app-shell__main .bg-primary {
+  background-color: var(--theme-teal) !important;
+}
+
+.app-shell__main .badge.bg-info,
+.app-shell__main .bg-info {
+  background-color: var(--theme-teal-soft) !important;
+  color: var(--theme-teal-dark) !important;
+}
+
+.app-shell__main .badge.bg-success,
+.app-shell__main .bg-success {
+  background-color: var(--theme-teal-soft) !important;
+  color: var(--theme-teal-dark) !important;
+}
+
+.app-shell__main .badge.bg-danger,
+.app-shell__main .bg-danger {
+  background-color: var(--theme-red-soft) !important;
+  color: var(--theme-red) !important;
+}
+
+.app-shell__main .text-primary {
+  color: var(--theme-teal) !important;
+}
+
+.app-shell__main .text-muted {
+  color: var(--theme-slate) !important;
+}
+
+.app-shell__main .progress {
+  height: 12px;
+  background: rgba(10, 123, 110, 0.08);
+  border-radius: 999px;
+}
+
+.app-shell__main .progress-bar {
+  background: var(--theme-teal);
+}
+
+.app-shell__main .spinner-border {
+  color: var(--theme-teal);
+  border-width: 0.16em;
+}
+
+.app-shell__main .alert {
+  border-radius: 1rem;
+  border-width: 1px;
+}
+
+.app-shell__main .alert-danger {
+  background: var(--theme-red-soft);
+  border-color: rgba(220, 38, 38, 0.16);
+  color: var(--theme-red);
+}
+
+.app-shell__main .alert-success {
+  background: var(--theme-teal-soft);
+  border-color: rgba(10, 123, 110, 0.18);
+  color: var(--theme-teal-dark);
+}
+
+.app-shell__main .form-label,
+.app-shell__main .text-uppercase {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--theme-slate);
+}
+
+.app-shell__main .modal-content {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+@keyframes app-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

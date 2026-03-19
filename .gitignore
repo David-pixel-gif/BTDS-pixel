@@ -1,1 +1,39 @@
-"node_modules/\nvenv/\ndatasets/\n*.csv\n*.json\n*.zip\n*.tar.gz" 
+# Ignore Python virtual environment
+backend/myenv_opinion/
+backend/venv/
+venv/
+
+# Ignore datasets and instance folders
+backend/instance/
+backend/datasets/
+
+# Ignore compiled Python files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Node.js dependencies
+node_modules/
+npm-debug.log
+
+# Ignore environment files
+.env
+*.sqlite3
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore compiled artifacts
+*.so
+*.egg
+*.egg-info/
+dist/
+build/

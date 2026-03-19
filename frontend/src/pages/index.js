@@ -1,0 +1,15 @@
+export { default as LandingPage } from "./LandingPage";
+export { default as LoginPage } from "./LoginPage";
+export { default as RegisterPage } from "./RegisterPage";
+export { default as Home } from "./Home";
+export { default as Diagnosis } from "./Diagnosis";
+export { default as PatientHistory } from "./PatientHistory";
+export { default as PatientDetails } from "./PatientDetails";
+export { default as ProfilePage } from "./ProfilePage";
+export { default as PatientRegistration } from "./PatientRegistration";
+export { default as Logout } from "./Logout";
+export { default as Reports } from "./Reports";
+export { default as MRIAnalysis } from "./MRIAnalysis";
+export { default as OutcomeAnalysis } from "./OutcomeAnalysis";
+export { default as RoleManagement } from "./RoleManagement";
+export { default as NotFound } from "./NotFound";

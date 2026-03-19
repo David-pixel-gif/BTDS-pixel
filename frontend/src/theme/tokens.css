@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --theme-teal: #0a7b6e;
+  --theme-teal-dark: #075e55;
+  --theme-teal-soft: #e7f6f3;
+  --theme-navy: #10273b;
+  --theme-navy-mid: #17334d;
+  --theme-slate: #567080;
+  --theme-border: #d9ebe7;
+  --theme-white: #ffffff;
+  --theme-bg: #f4f9f8;
+  --theme-gold: #c59c45;
+  --theme-gold-soft: #fbf4e3;
+  --theme-red: #dc2626;
+  --theme-red-soft: #fef2f2;
+  --theme-shadow-soft: 0 18px 40px rgba(16, 39, 59, 0.08);
+  --theme-shadow-medium: 0 22px 45px rgba(16, 39, 59, 0.12);
+  --theme-radius-lg: 24px;
+  --theme-radius-md: 16px;
+  --theme-font-sans: 'DM Sans', sans-serif;
+  --theme-font-serif: 'Playfair Display', serif;
+
+  /* Landing page aliases */
+  --lp-teal: var(--theme-teal);
+  --lp-teal-dark: var(--theme-teal-dark);
+  --lp-teal-soft: var(--theme-teal-soft);
+  --lp-navy: var(--theme-navy);
+  --lp-slate: var(--theme-slate);
+  --lp-border: var(--theme-border);
+  --lp-white: var(--theme-white);
+  --lp-bg: var(--theme-bg);
+  --lp-gold: var(--theme-gold);
+}

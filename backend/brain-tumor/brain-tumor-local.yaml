@@ -1,0 +1,6 @@
+path: C:/Users/jnthn/projects/BTDS-pixel-master/BTDS-pixel-master/backend/brain-tumor
+train: images/train
+val: images/val
+names:
+  0: negative
+  1: positive

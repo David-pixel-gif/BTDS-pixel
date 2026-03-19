@@ -1,0 +1,7 @@
+names:
+  - Glioma
+  - Meningioma
+  - No Tumor
+  - Pituitary
+train: C:/Users/PHOENIX/Desktop/my project 1/mri for brain tumor with bounding boxes/Train
+val: C:/Users/PHOENIX/Desktop/my project 1/mri for brain tumor with bounding boxes/Val
