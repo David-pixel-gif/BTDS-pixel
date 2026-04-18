@@ -165,9 +165,12 @@ export const fetchBackendEndpoints = async () => {
 export const validateEndpointContract = async () => {
   try {
     const backendEndpoints = await fetchBackendEndpoints();
-    const backendMap = new Map(
-      backendEndpoints.map((item) => [item.path, new Set(item.methods)])
-    );
+    const backendMap = backendEndpoints.reduce((map, item) => {
+      const methods = map.get(item.path) || new Set();
+      item.methods.forEach((method) => methods.add(method));
+      map.set(item.path, methods);
+      return map;
+    }, new Map());
 
     const missing = FRONTEND_ENDPOINT_MANIFEST.filter((item) => {
       const methods = backendMap.get(item.path);

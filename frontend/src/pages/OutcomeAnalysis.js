@@ -36,15 +36,30 @@ const OutcomeAnalysis = () => {
         setError("");
         const config = getAuthConfig();
 
-        const [summaryRes, distRes, historyRes] = await Promise.all([
+        const [summaryRes, distRes, historyRes] = await Promise.allSettled([
           axios.get(apiUrl(ENDPOINTS.reports.summary), config),
           axios.get(apiUrl(ENDPOINTS.reports.tumorClasses), config),
           axios.get(apiUrl(ENDPOINTS.reports.myHistory), config),
         ]);
 
-        setSummary(summaryRes.data);
-        setDistribution(distRes.data);
-        setHistory(historyRes.data.reverse());
+        const nextSummary =
+          summaryRes.status === "fulfilled"
+            ? summaryRes.value.data
+            : {
+                total_scans: 0,
+                tumors_detected: 0,
+                detection_rate: 0,
+                average_confidence: 0,
+              };
+        const nextDistribution = distRes.status === "fulfilled" ? distRes.value.data : {};
+        const nextHistory =
+          historyRes.status === "fulfilled" && Array.isArray(historyRes.value.data)
+            ? [...historyRes.value.data].reverse()
+            : [];
+
+        setSummary(nextSummary);
+        setDistribution(nextDistribution);
+        setHistory(nextHistory);
       } catch (err) {
         setError("Failed to load outcome analysis.");
       } finally {
@@ -59,7 +74,7 @@ const OutcomeAnalysis = () => {
     return (
       <div className="text-center mt-5">
         <Spinner animation="border" />
-        <p className="mt-3">Loading outcome analysis…</p>
+        <p className="mt-3">Loading outcome analysis...</p>
       </div>
     );
   }
@@ -77,7 +92,7 @@ const OutcomeAnalysis = () => {
   const avgConfidence =
     history.length > 0
       ? (
-          history.reduce((sum, s) => sum + s.confidence, 0) / history.length
+          history.reduce((sum, s) => sum + Number(s.confidence || 0), 0) / history.length
         ).toFixed(2)
       : 0;
 
@@ -86,7 +101,7 @@ const OutcomeAnalysis = () => {
     datasets: [
       {
         label: "Confidence (%)",
-        data: history.map((s) => s.confidence),
+        data: history.map((s) => Number(s.confidence || 0)),
         borderColor: "rgba(13,110,253,1)",
         backgroundColor: "rgba(13,110,253,0.2)",
         fill: true,

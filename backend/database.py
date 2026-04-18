@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import date, datetime
+from threading import RLock
 from types import SimpleNamespace
 
 import mysql.connector
@@ -9,6 +10,7 @@ from mysql.connector import errorcode
 
 _connection = None
 _db = None
+_db_lock = RLock()
 
 
 DEFAULT_PERMISSIONS = [
@@ -327,12 +329,13 @@ class MySqlCollection:
         placeholders = ", ".join(["%s"] * len(columns))
         names = ", ".join(f"`{column}`" for column in columns)
 
-        with self.database.connection.cursor() as cursor:
-            cursor.execute(
-                f"INSERT INTO `{self.table}` ({names}) VALUES ({placeholders})",
-                values,
-            )
-            inserted_id = cursor.lastrowid
+        with _db_lock:
+            with self.database.connection.cursor() as cursor:
+                cursor.execute(
+                    f"INSERT INTO `{self.table}` ({names}) VALUES ({placeholders})",
+                    values,
+                )
+                inserted_id = cursor.lastrowid
 
         return SimpleNamespace(inserted_id=inserted_id)
 
@@ -372,9 +375,10 @@ class MySqlCollection:
 
     def delete_one(self, query):
         where_sql, params = _build_where(self.table, query or {})
-        with self.database.connection.cursor() as cursor:
-            cursor.execute(f"DELETE FROM `{self.table}`{where_sql} LIMIT 1", params)
-            return SimpleNamespace(deleted_count=cursor.rowcount)
+        with _db_lock:
+            with self.database.connection.cursor() as cursor:
+                cursor.execute(f"DELETE FROM `{self.table}`{where_sql} LIMIT 1", params)
+                return SimpleNamespace(deleted_count=cursor.rowcount)
 
     def find_one_and_update(self, query, update, upsert=False, return_document=None, **_kwargs):
         existing = self.find_one(query)
@@ -406,9 +410,10 @@ class MySqlCollection:
             limit_sql = " LIMIT %s"
             params.append(int(limit_value))
 
-        with self.database.connection.cursor(dictionary=True) as cursor:
-            cursor.execute(f"SELECT * FROM `{self.table}`{where_sql}{order_sql}{limit_sql}", params)
-            rows = cursor.fetchall()
+        with _db_lock:
+            with self.database.connection.cursor(dictionary=True) as cursor:
+                cursor.execute(f"SELECT * FROM `{self.table}`{where_sql}{order_sql}{limit_sql}", params)
+                rows = cursor.fetchall()
 
         return [_apply_projection(_deserialize_row(self.table, row), projection) for row in rows]
 
@@ -441,11 +446,12 @@ class MySqlCollection:
 
         where_sql, where_params = _build_where(self.table, query or {})
         params.extend(where_params)
-        with self.database.connection.cursor() as cursor:
-            cursor.execute(
-                f"UPDATE `{self.table}` SET {', '.join(assignments)}{where_sql}",
-                params,
-            )
+        with _db_lock:
+            with self.database.connection.cursor() as cursor:
+                cursor.execute(
+                    f"UPDATE `{self.table}` SET {', '.join(assignments)}{where_sql}",
+                    params,
+                )
 
 
 class MySqlDatabase:
@@ -627,9 +633,10 @@ def ensure_schema():
         """,
     ]
 
-    with _connection.cursor() as cursor:
-        for statement in statements:
-            cursor.execute(statement)
+    with _db_lock:
+        with _connection.cursor() as cursor:
+            for statement in statements:
+                cursor.execute(statement)
 
 
 def ensure_indexes():

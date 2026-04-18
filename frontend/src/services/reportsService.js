@@ -8,6 +8,32 @@ const withParams = (params = {}) => ({
   ),
 });
 
+const emptySummary = {
+  total_scans: 0,
+  tumors_detected: 0,
+  no_tumor: 0,
+  detection_rate: 0,
+  average_confidence: 0,
+  average_processing_time: 0,
+  model_usage: {},
+};
+
+const emptyAdminUsage = {
+  active_users: [],
+  total_audit_events: 0,
+  total_exports: 0,
+};
+
+const safeGet = async (path, config, fallback) => {
+  try {
+    const response = await axios.get(apiUrl(path), config);
+    return response.data;
+  } catch (error) {
+    console.warn(`Report endpoint failed: ${path}`, error);
+    return fallback;
+  }
+};
+
 export async function fetchReportsDashboard(filters = {}) {
   const config = withParams(filters);
   const { role } = getStoredAuthUser();
@@ -30,44 +56,51 @@ export async function fetchReportsDashboard(filters = {}) {
     exportActivity,
     whatsappScans,
   ] = await Promise.all([
-    axios.get(apiUrl(ENDPOINTS.reports.rootSummary), config),
-    axios.get(apiUrl(ENDPOINTS.reports.all), config),
-    axios.get(apiUrl(ENDPOINTS.reports.patientScans), config),
-    axios.get(apiUrl(ENDPOINTS.reports.modelPerformance), config),
-    axios.get(apiUrl(ENDPOINTS.reports.auditTrail), config),
-    axios.get(apiUrl(ENDPOINTS.reports.adminUsage), config),
-    axios.get(apiUrl(ENDPOINTS.reports.researchDemo), config),
-    axios.get(apiUrl(ENDPOINTS.reports.diagnosesOverTime), config),
-    axios.get(apiUrl(ENDPOINTS.reports.resultDistribution), config),
-    axios.get(apiUrl(ENDPOINTS.reports.classDistribution), config),
-    axios.get(apiUrl(ENDPOINTS.reports.modelUsage), config),
-    axios.get(apiUrl(ENDPOINTS.reports.confidenceByModel), config),
-    axios.get(apiUrl(ENDPOINTS.reports.processingTimeTrend), config),
-    axios.get(apiUrl(ENDPOINTS.reports.confidenceDistribution), config),
-    axios.get(apiUrl(ENDPOINTS.reports.exportActivity), config),
+    safeGet(ENDPOINTS.reports.rootSummary, config, emptySummary),
+    safeGet(ENDPOINTS.reports.all, config, []),
+    safeGet(ENDPOINTS.reports.patientScans, config, []),
+    safeGet(ENDPOINTS.reports.modelPerformance, config, { summary: emptySummary, models: [], recent_scans: [] }),
+    safeGet(ENDPOINTS.reports.auditTrail, config, []),
+    safeGet(ENDPOINTS.reports.adminUsage, config, emptyAdminUsage),
+    safeGet(ENDPOINTS.reports.researchDemo, config, {
+      dataset_size: 0,
+      models_used: [],
+      average_confidence: 0,
+      average_processing_time: 0,
+      tumor_type_distribution: {},
+      export_events: 0,
+    }),
+    safeGet(ENDPOINTS.reports.diagnosesOverTime, config, []),
+    safeGet(ENDPOINTS.reports.resultDistribution, config, {}),
+    safeGet(ENDPOINTS.reports.classDistribution, config, {}),
+    safeGet(ENDPOINTS.reports.modelUsage, config, {}),
+    safeGet(ENDPOINTS.reports.confidenceByModel, config, {}),
+    safeGet(ENDPOINTS.reports.processingTimeTrend, config, []),
+    safeGet(ENDPOINTS.reports.confidenceDistribution, config, {}),
+    safeGet(ENDPOINTS.reports.exportActivity, config, []),
     isAdmin
-      ? axios.get(apiUrl(ENDPOINTS.reports.whatsappScans), config)
-      : Promise.resolve({ data: [] }),
+      ? safeGet(ENDPOINTS.reports.whatsappScans, config, [])
+      : Promise.resolve([]),
   ]);
 
   return {
-    summary: summary.data,
-    scans: scans.data,
-    patientScans: patientScans.data,
-    modelPerformance: modelPerformance.data,
-    auditTrail: auditTrail.data,
-    adminUsage: adminUsage.data,
-    researchDemo: researchDemo.data,
-    whatsappScans: whatsappScans.data,
+    summary,
+    scans,
+    patientScans,
+    modelPerformance,
+    auditTrail,
+    adminUsage,
+    researchDemo,
+    whatsappScans,
     charts: {
-      diagnosesOverTime: diagnosesOverTime.data,
-      resultDistribution: resultDistribution.data,
-      classDistribution: classDistribution.data,
-      modelUsage: modelUsage.data,
-      confidenceByModel: confidenceByModel.data,
-      processingTimeTrend: processingTimeTrend.data,
-      confidenceDistribution: confidenceDistribution.data,
-      exportActivity: exportActivity.data,
+      diagnosesOverTime,
+      resultDistribution,
+      classDistribution,
+      modelUsage,
+      confidenceByModel,
+      processingTimeTrend,
+      confidenceDistribution,
+      exportActivity,
     },
   };
 }
