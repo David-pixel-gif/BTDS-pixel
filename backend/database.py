@@ -1,16 +1,15 @@
 import json
 import os
 from datetime import date, datetime
-from threading import RLock
+from threading import Lock
 from types import SimpleNamespace
 
 import mysql.connector
 from mysql.connector import errorcode
 
 
-_connection = None
 _db = None
-_db_lock = RLock()
+_schema_lock = Lock()
 
 
 DEFAULT_PERMISSIONS = [
@@ -329,13 +328,16 @@ class MySqlCollection:
         placeholders = ", ".join(["%s"] * len(columns))
         names = ", ".join(f"`{column}`" for column in columns)
 
-        with _db_lock:
-            with self.database.connection.cursor() as cursor:
+        connection = self.database.open_connection()
+        try:
+            with connection.cursor() as cursor:
                 cursor.execute(
                     f"INSERT INTO `{self.table}` ({names}) VALUES ({placeholders})",
                     values,
                 )
                 inserted_id = cursor.lastrowid
+        finally:
+            connection.close()
 
         return SimpleNamespace(inserted_id=inserted_id)
 
@@ -375,10 +377,13 @@ class MySqlCollection:
 
     def delete_one(self, query):
         where_sql, params = _build_where(self.table, query or {})
-        with _db_lock:
-            with self.database.connection.cursor() as cursor:
+        connection = self.database.open_connection()
+        try:
+            with connection.cursor() as cursor:
                 cursor.execute(f"DELETE FROM `{self.table}`{where_sql} LIMIT 1", params)
                 return SimpleNamespace(deleted_count=cursor.rowcount)
+        finally:
+            connection.close()
 
     def find_one_and_update(self, query, update, upsert=False, return_document=None, **_kwargs):
         existing = self.find_one(query)
@@ -410,10 +415,13 @@ class MySqlCollection:
             limit_sql = " LIMIT %s"
             params.append(int(limit_value))
 
-        with _db_lock:
-            with self.database.connection.cursor(dictionary=True) as cursor:
+        connection = self.database.open_connection()
+        try:
+            with connection.cursor(dictionary=True) as cursor:
                 cursor.execute(f"SELECT * FROM `{self.table}`{where_sql}{order_sql}{limit_sql}", params)
                 rows = cursor.fetchall()
+        finally:
+            connection.close()
 
         return [_apply_projection(_deserialize_row(self.table, row), projection) for row in rows]
 
@@ -446,18 +454,23 @@ class MySqlCollection:
 
         where_sql, where_params = _build_where(self.table, query or {})
         params.extend(where_params)
-        with _db_lock:
-            with self.database.connection.cursor() as cursor:
+        connection = self.database.open_connection()
+        try:
+            with connection.cursor() as cursor:
                 cursor.execute(
                     f"UPDATE `{self.table}` SET {', '.join(assignments)}{where_sql}",
                     params,
                 )
+        finally:
+            connection.close()
 
 
 class MySqlDatabase:
-    def __init__(self, connection, name):
-        self.connection = connection
+    def __init__(self, name):
         self.name = name
+
+    def open_connection(self):
+        return _connect()
 
     def __getattr__(self, table):
         if table not in TABLE_COLUMNS:
@@ -501,31 +514,21 @@ def _ensure_database_exists():
 
 
 def get_database():
-    global _connection, _db
+    global _db
 
     if _db is not None:
-        try:
-            _connection.ping(reconnect=True, attempts=1, delay=0)
-        except mysql.connector.Error:
-            close_database()
-        else:
-            return _db
+        return _db
 
     _ensure_database_exists()
-    _connection = _connect()
-    _db = MySqlDatabase(_connection, _mysql_config()["database"])
     ensure_schema()
+    _db = MySqlDatabase(_mysql_config()["database"])
     seed_defaults()
     return _db
 
 
 def close_database():
-    global _connection, _db
+    global _db
 
-    if _connection is not None and _connection.is_connected():
-        _connection.close()
-
-    _connection = None
     _db = None
 
 
@@ -633,10 +636,14 @@ def ensure_schema():
         """,
     ]
 
-    with _db_lock:
-        with _connection.cursor() as cursor:
-            for statement in statements:
-                cursor.execute(statement)
+    with _schema_lock:
+        connection = _connect()
+        try:
+            with connection.cursor() as cursor:
+                for statement in statements:
+                    cursor.execute(statement)
+        finally:
+            connection.close()
 
 
 def ensure_indexes():
