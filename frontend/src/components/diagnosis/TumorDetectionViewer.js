@@ -40,6 +40,40 @@ const ViewerCanvas = ({
     };
   }, [bbox, hasBox, imageSrc, imageSize.height, imageSize.width]);
 
+  const labelStyle = useMemo(() => {
+    if (!hasBox || !imageSize.width || !imageSize.height) {
+      return null;
+    }
+
+    const [x1, y1, x2, y2] = bbox;
+    const labelWidth = 220;
+    const labelHeight = 58;
+    const horizontalPadding = 14;
+    const verticalOffset = 14;
+    const canPlaceRight = x2 + labelWidth + horizontalPadding <= imageSize.width;
+    const canPlaceLeft = x1 - labelWidth - horizontalPadding >= horizontalPadding;
+    const preferredLeft = canPlaceRight
+      ? x2 + horizontalPadding
+      : canPlaceLeft
+        ? x1 - labelWidth - horizontalPadding
+        : Math.min(
+            Math.max(horizontalPadding, x1),
+            Math.max(horizontalPadding, imageSize.width - labelWidth - horizontalPadding),
+          );
+    const preferredTop =
+      y1 > labelHeight + verticalOffset
+        ? y1 - labelHeight - verticalOffset
+        : Math.min(
+            imageSize.height - labelHeight - verticalOffset,
+            y2 + verticalOffset,
+          );
+
+    return {
+      left: `${(preferredLeft / imageSize.width) * 100}%`,
+      top: `${(preferredTop / imageSize.height) * 100}%`,
+    };
+  }, [bbox, hasBox, imageSize.height, imageSize.width]);
+
   return (
     <div
       className="diag-viewer-stage"
@@ -59,7 +93,7 @@ const ViewerCanvas = ({
             <div className="diag-viewer-box" style={overlayStyle} />
             <div
               className="diag-viewer-label"
-              style={{ left: overlayStyle.left, top: `calc(${overlayStyle.top} - 52px)` }}
+              style={labelStyle || { left: overlayStyle.left, top: `calc(${overlayStyle.top} - 52px)` }}
             >
               <strong>Tumor Region</strong>
               <span>{tumorLabel}</span>
@@ -72,12 +106,126 @@ const ViewerCanvas = ({
   );
 };
 
+const exportAnnotatedImage = ({ imageSrc, bbox, tumorType, confidenceText }) =>
+  new Promise((resolve, reject) => {
+    if (!imageSrc) {
+      reject(new Error('No image source available.'));
+      return;
+    }
+
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext('2d');
+
+      if (!context) {
+        reject(new Error('Canvas context is unavailable.'));
+        return;
+      }
+
+      context.drawImage(image, 0, 0);
+
+      if (Array.isArray(bbox) && bbox.length === 4) {
+        const [x1, y1, x2, y2] = bbox;
+        const width = Math.max(0, x2 - x1);
+        const height = Math.max(0, y2 - y1);
+        const label = `Tumor Region | ${tumorType || 'Detected Region'} | Confidence: ${confidenceText}`;
+
+        context.strokeStyle = '#ff6d63';
+        context.lineWidth = Math.max(4, Math.round(canvas.width * 0.005));
+        context.shadowColor = 'rgba(255,91,91,0.45)';
+        context.shadowBlur = 24;
+        context.strokeRect(x1, y1, width, height);
+        context.shadowBlur = 0;
+
+        context.font = `${Math.max(18, Math.round(canvas.width * 0.018))}px "DM Sans", sans-serif`;
+        const textWidth = context.measureText(label).width;
+        const labelHeight = Math.max(36, Math.round(canvas.height * 0.05));
+        const labelY = Math.max(12, y1 - labelHeight - 10);
+
+        context.fillStyle = 'rgba(10,23,30,0.86)';
+        context.fillRect(x1, labelY, textWidth + 28, labelHeight);
+        context.strokeStyle = 'rgba(255,255,255,0.16)';
+        context.lineWidth = 1;
+        context.strokeRect(x1, labelY, textWidth + 28, labelHeight);
+        context.fillStyle = '#eff9ff';
+        context.fillText(label, x1 + 14, labelY + (labelHeight / 2) + 6);
+      }
+
+      resolve(canvas.toDataURL('image/png'));
+    };
+    image.onerror = () => reject(new Error('Unable to render image export.'));
+    image.src = imageSrc;
+  });
+
+const exportCompareImage = async ({ processedImageSrc, originalImageSrc, bbox, tumorType, confidenceText }) => {
+  const annotatedResult = await exportAnnotatedImage({
+    imageSrc: processedImageSrc || originalImageSrc,
+    bbox,
+    tumorType,
+    confidenceText,
+  });
+
+  return new Promise((resolve, reject) => {
+    if (!originalImageSrc) {
+      reject(new Error('No original image source available.'));
+      return;
+    }
+
+    const annotatedImage = new Image();
+    const originalImage = new Image();
+    let loaded = 0;
+
+    const finishIfReady = () => {
+      loaded += 1;
+      if (loaded < 2) {
+        return;
+      }
+
+      const gap = 24;
+      const labelHeight = 44;
+      const panelWidth = Math.max(annotatedImage.naturalWidth, originalImage.naturalWidth);
+      const panelHeight = Math.max(annotatedImage.naturalHeight, originalImage.naturalHeight);
+      const canvas = document.createElement('canvas');
+      canvas.width = (panelWidth * 2) + gap;
+      canvas.height = panelHeight + labelHeight;
+      const context = canvas.getContext('2d');
+
+      if (!context) {
+        reject(new Error('Canvas context is unavailable.'));
+        return;
+      }
+
+      context.fillStyle = '#09131a';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.font = '700 22px "DM Sans", sans-serif';
+      context.fillStyle = '#dbe8ef';
+      context.fillText('Annotated Result', 18, 30);
+      context.fillText('Original Upload', panelWidth + gap + 18, 30);
+      context.drawImage(annotatedImage, 0, labelHeight, panelWidth, panelHeight);
+      context.drawImage(originalImage, panelWidth + gap, labelHeight, panelWidth, panelHeight);
+      resolve(canvas.toDataURL('image/png'));
+    };
+
+    annotatedImage.onload = finishIfReady;
+    originalImage.onload = finishIfReady;
+    annotatedImage.onerror = () => reject(new Error('Unable to render annotated compare image.'));
+    originalImage.onerror = () => reject(new Error('Unable to render original compare image.'));
+    annotatedImage.src = annotatedResult;
+    originalImage.src = originalImageSrc;
+  });
+};
+
 const TumorDetectionViewer = ({
   originalImageSrc,
   processedImageSrc,
   bbox,
   confidenceText,
   tumorType,
+  embedded = false,
 }) => {
   const [compareMode, setCompareMode] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -88,7 +236,7 @@ const TumorDetectionViewer = ({
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const fullscreenRef = useRef(null);
 
-  const primaryImage = originalImageSrc || processedImageSrc;
+  const primaryImage = processedImageSrc || originalImageSrc;
   const scaledBbox = useMemo(() => {
     if (!bbox) {
       return null;
@@ -101,15 +249,29 @@ const TumorDetectionViewer = ({
     setPan({ x: 0, y: 0 });
   };
 
-  const downloadImage = () => {
-    const target = processedImageSrc || primaryImage;
-    if (!target) {
-      return;
+  const downloadImage = async () => {
+    try {
+      const exportUrl = compareMode && originalImageSrc && (processedImageSrc || originalImageSrc)
+        ? await exportCompareImage({
+            processedImageSrc: processedImageSrc || originalImageSrc,
+            originalImageSrc,
+            bbox: scaledBbox,
+            tumorType,
+            confidenceText,
+          })
+        : await exportAnnotatedImage({
+            imageSrc: primaryImage,
+            bbox: scaledBbox,
+            tumorType,
+            confidenceText,
+          });
+      const link = document.createElement('a');
+      link.href = exportUrl;
+      link.download = compareMode ? 'mri-compare-view.png' : 'annotated-mri.png';
+      link.click();
+    } catch (error) {
+      console.error('Unable to download annotated MRI image:', error);
     }
-    const link = document.createElement('a');
-    link.href = target;
-    link.download = 'annotated-mri.png';
-    link.click();
   };
 
   const handleWheel = (event) => {
@@ -139,8 +301,9 @@ const TumorDetectionViewer = ({
     await fullscreenRef.current.requestFullscreen();
   };
 
-  return (
-    <section className="diag-viewer-card" aria-label="AI tumor localisation">
+  const content = (
+    <>
+      {!embedded ? (
       <div className="diag-card-heading diag-card-heading-with-actions">
         <div>
           <h3>AI Tumor Localisation</h3>
@@ -151,18 +314,19 @@ const TumorDetectionViewer = ({
           <span>Detected Region</span>
         </div>
       </div>
+      ) : null}
 
       {primaryImage ? (
         <>
           {compareMode && originalImageSrc && processedImageSrc ? (
             <div className="diag-compare-grid">
               <div className="diag-compare-panel">
-                <span className="diag-compare-label">Original MRI</span>
-                <img src={originalImageSrc} alt="Original MRI scan" />
+                <span className="diag-compare-label">Annotated Result</span>
+                <img src={processedImageSrc} alt="Detected MRI scan" />
               </div>
               <div className="diag-compare-panel">
-                <span className="diag-compare-label">Detected MRI</span>
-                <img src={processedImageSrc} alt="Detected MRI scan" />
+                <span className="diag-compare-label">Original Upload</span>
+                <img src={originalImageSrc} alt="Original MRI scan" />
               </div>
             </div>
           ) : (
@@ -247,6 +411,16 @@ const TumorDetectionViewer = ({
           </button>
         </Modal.Footer>
       </Modal>
+    </>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <section className="diag-viewer-card" aria-label="AI tumor localisation">
+      {content}
     </section>
   );
 };
