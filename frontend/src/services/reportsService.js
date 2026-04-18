@@ -8,30 +8,9 @@ const withParams = (params = {}) => ({
   ),
 });
 
-const emptySummary = {
-  total_scans: 0,
-  tumors_detected: 0,
-  no_tumor: 0,
-  detection_rate: 0,
-  average_confidence: 0,
-  average_processing_time: 0,
-  model_usage: {},
-};
-
-const emptyAdminUsage = {
-  active_users: [],
-  total_audit_events: 0,
-  total_exports: 0,
-};
-
-const safeGet = async (path, config, fallback) => {
-  try {
-    const response = await axios.get(apiUrl(path), config);
-    return response.data;
-  } catch (error) {
-    console.warn(`Report endpoint failed: ${path}`, error);
-    return fallback;
-  }
+const getReport = async (path, config) => {
+  const response = await axios.get(apiUrl(path), config);
+  return response.data;
 };
 
 export async function fetchReportsDashboard(filters = {}) {
@@ -45,7 +24,6 @@ export async function fetchReportsDashboard(filters = {}) {
     modelPerformance,
     auditTrail,
     adminUsage,
-    researchDemo,
     diagnosesOverTime,
     resultDistribution,
     classDistribution,
@@ -56,30 +34,22 @@ export async function fetchReportsDashboard(filters = {}) {
     exportActivity,
     whatsappScans,
   ] = await Promise.all([
-    safeGet(ENDPOINTS.reports.rootSummary, config, emptySummary),
-    safeGet(ENDPOINTS.reports.all, config, []),
-    safeGet(ENDPOINTS.reports.patientScans, config, []),
-    safeGet(ENDPOINTS.reports.modelPerformance, config, { summary: emptySummary, models: [], recent_scans: [] }),
-    safeGet(ENDPOINTS.reports.auditTrail, config, []),
-    safeGet(ENDPOINTS.reports.adminUsage, config, emptyAdminUsage),
-    safeGet(ENDPOINTS.reports.researchDemo, config, {
-      dataset_size: 0,
-      models_used: [],
-      average_confidence: 0,
-      average_processing_time: 0,
-      tumor_type_distribution: {},
-      export_events: 0,
-    }),
-    safeGet(ENDPOINTS.reports.diagnosesOverTime, config, []),
-    safeGet(ENDPOINTS.reports.resultDistribution, config, {}),
-    safeGet(ENDPOINTS.reports.classDistribution, config, {}),
-    safeGet(ENDPOINTS.reports.modelUsage, config, {}),
-    safeGet(ENDPOINTS.reports.confidenceByModel, config, {}),
-    safeGet(ENDPOINTS.reports.processingTimeTrend, config, []),
-    safeGet(ENDPOINTS.reports.confidenceDistribution, config, {}),
-    safeGet(ENDPOINTS.reports.exportActivity, config, []),
+    getReport(ENDPOINTS.reports.rootSummary, config),
+    getReport(ENDPOINTS.reports.all, config),
+    getReport(ENDPOINTS.reports.patientScans, config),
+    getReport(ENDPOINTS.reports.modelPerformance, config),
+    getReport(ENDPOINTS.reports.auditTrail, config),
+    getReport(ENDPOINTS.reports.adminUsage, config),
+    getReport(ENDPOINTS.reports.diagnosesOverTime, config),
+    getReport(ENDPOINTS.reports.resultDistribution, config),
+    getReport(ENDPOINTS.reports.classDistribution, config),
+    getReport(ENDPOINTS.reports.modelUsage, config),
+    getReport(ENDPOINTS.reports.confidenceByModel, config),
+    getReport(ENDPOINTS.reports.processingTimeTrend, config),
+    getReport(ENDPOINTS.reports.confidenceDistribution, config),
+    getReport(ENDPOINTS.reports.exportActivity, config),
     isAdmin
-      ? safeGet(ENDPOINTS.reports.whatsappScans, config, [])
+      ? getReport(ENDPOINTS.reports.whatsappScans, config)
       : Promise.resolve([]),
   ]);
 
@@ -90,7 +60,6 @@ export async function fetchReportsDashboard(filters = {}) {
     modelPerformance,
     auditTrail,
     adminUsage,
-    researchDemo,
     whatsappScans,
     charts: {
       diagnosesOverTime,

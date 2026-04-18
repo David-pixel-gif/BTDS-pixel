@@ -619,7 +619,7 @@ function LandingPage() {
             </div>
             <div className="lp-trust-card">
               <h3>Where it fits</h3>
-              <p>Use it for MRI triage support, structured patient review, and reporting workflows tied to the Mongo-backed application state.</p>
+              <p>Use it for MRI triage support, structured patient review, and reporting workflows tied to the MySQL-backed application state.</p>
             </div>
           </div>
         </section>
@@ -631,11 +631,10 @@ function LandingPage() {
             <p>The interface now relies on live application routes and persistent backend data rather than placeholder UI-only records.</p>
           </div>
           <div className="lp-grid-2">
-            {LandingData.trust.testimonials.map((item) => (
-              <article key={item.name} className="lp-trust-card">
-                <h3>{item.name}</h3>
-                <p>{item.quote}</p>
-                <p>{item.role}</p>
+            {LandingData.trust.items.map((item) => (
+              <article key={item.title} className="lp-trust-card">
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
               </article>
             ))}
           </div>
@@ -662,7 +661,7 @@ function LandingPage() {
               </a>
               <p className="lp-subtitle" style={{ marginTop: "1rem", maxWidth: "28rem" }}>
                 Precision-focused brain MRI analysis with live authentication, WhatsApp diagnosis intake,
-                and Mongo-backed clinical records for professional use.
+                and MySQL-backed clinical records for professional use.
               </p>
             </div>
             <div className="lp-footer-links">

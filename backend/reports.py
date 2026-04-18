@@ -324,27 +324,6 @@ def admin_usage(current_user):
     )
 
 
-@reports_bp.route("/reports/research-demo", methods=["GET"])
-@token_required
-def research_demo_report(current_user):
-    scans = _query_scans()
-    audits = _query_audit()
-    return jsonify(
-        {
-            "dataset_size": len(scans),
-            "models_used": list(sorted({scan.get("model_used", "Unknown") for scan in scans})),
-            "average_confidence": _safe_average([float(scan.get("confidence", 0)) for scan in scans]),
-            "average_processing_time": _safe_average(
-                [float(scan.get("processing_time", 0)) for scan in scans], 3
-            ),
-            "tumor_type_distribution": dict(
-                Counter(scan.get("tumor_type", "Unspecified") for scan in scans if scan.get("tumor_type"))
-            ),
-            "export_events": len([audit for audit in audits if audit.get("action", "").startswith("report.export")]),
-        }
-    )
-
-
 @reports_bp.route("/reports/tumors/classes", methods=["GET"])
 @reports_bp.route("/reports/charts/class-distribution", methods=["GET"])
 @token_required
@@ -433,41 +412,34 @@ def export_activity(current_user):
 @reports_bp.route("/reports/model/confusion-matrix", methods=["GET"])
 @token_required
 def confusion_matrix(current_user):
-    scans = _query_scans()
-    summary = _summary_from_scans(scans)
     return jsonify(
         {
-            "true_positive": summary["tumors_detected"],
-            "false_positive": 0,
-            "true_negative": summary["no_tumor"],
-            "false_negative": 0,
+            "error": "Ground-truth labels are required before a real confusion matrix can be calculated.",
+            "required_fields": ["ground_truth_label", "predicted_label"],
         }
-    )
+    ), 422
 
 
 @reports_bp.route("/reports/model/roc", methods=["GET"])
 @token_required
 def roc_curve(current_user):
-    scans = _query_scans()
-    confidences = sorted([float(scan.get("confidence", 0)) / 100 for scan in scans])
-    if not confidences:
-        return jsonify({"fpr": [0, 1], "tpr": [0, 1]})
-    total = max(len(confidences) - 1, 1)
     return jsonify(
         {
-            "fpr": [round(index / total, 2) for index, _ in enumerate(confidences)],
-            "tpr": [round(value, 2) for value in confidences],
+            "error": "Ground-truth labels are required before a real ROC curve can be calculated.",
+            "required_fields": ["ground_truth_label", "prediction_score"],
         }
-    )
+    ), 422
 
 
 @reports_bp.route("/reports/model/accuracy-by-class", methods=["GET"])
 @token_required
 def accuracy_by_class(current_user):
-    scans = _query_scans()
-    distribution = Counter(scan.get("tumor_type", "No Tumor") if scan.get("tumor_type") else "No Tumor" for scan in scans)
-    total = max(sum(distribution.values()), 1)
-    return jsonify({label: round((count / total) * 100, 2) for label, count in distribution.items()})
+    return jsonify(
+        {
+            "error": "Ground-truth labels are required before real per-class accuracy can be calculated.",
+            "required_fields": ["ground_truth_label", "predicted_label"],
+        }
+    ), 422
 
 
 def _simple_pdf(text_lines):

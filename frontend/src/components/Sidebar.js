@@ -25,7 +25,7 @@ const navItems = [
   {
     to: '/diagnosis-chat',
     label: 'Diagnosis Chat',
-    description: 'WhatsApp-style demo flow',
+    description: 'Chat-based scan workflow',
     icon: LuScanLine,
   },
   {

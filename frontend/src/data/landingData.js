@@ -79,18 +79,16 @@ const LandingData = {
 
   trust: {
     title: "Designed for Clinical & Research Use",
-    testimonials: [
+    items: [
       {
-        quote:
-          "The staged pipeline mirrors how radiologists reason through MRI analysis.",
-        name: "Clinical Reviewer",
-        role: "Medical Imaging"
+        title: "Persistent Records",
+        description:
+          "Patients, users, diagnosis records, audit events, and reports are stored through the MySQL-backed backend."
       },
       {
-        quote:
-          "Clear separation between classification and localization improves interpretability.",
-        name: "Research Supervisor",
-        role: "AI & Healthcare"
+        title: "Auditable Workflow",
+        description:
+          "Report exports and diagnostic activity are logged so operational history comes from application events."
       }
     ]
   },

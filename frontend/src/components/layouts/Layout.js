@@ -32,7 +32,7 @@ const pageMeta = {
   '/diagnosis-chat': {
     tag: 'Chat',
     title: 'Diagnosis Chat',
-    description: 'WhatsApp-style in-app scan intake for rapid diagnostic demos.',
+    description: 'Chat-based scan intake for diagnostic review.',
     Icon: LuScanLine,
   },
   '/patient-history': {

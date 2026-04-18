@@ -370,13 +370,15 @@ const Reports = () => {
         <Col lg={4}>
           <Card className="shadow-sm h-100">
             <Card.Body>
-              <h5>Research / Demo Report</h5>
-              <div className="text-muted small">Dataset size</div>
-              <div className="fw-semibold fs-4 mb-3">{dashboard?.researchDemo?.dataset_size ?? 0}</div>
-              <div className="text-muted small">Models used</div>
-              <div className="mb-3">{(dashboard?.researchDemo?.models_used || []).join(", ") || "None"}</div>
-              <div className="text-muted small">Export events</div>
-              <div className="fw-semibold">{dashboard?.researchDemo?.export_events ?? 0}</div>
+              <h5>Live Model Activity</h5>
+              <div className="text-muted small">Stored diagnosis records</div>
+              <div className="fw-semibold fs-4 mb-3">{dashboard?.modelPerformance?.summary?.total_scans ?? 0}</div>
+              <div className="text-muted small">Models with scan activity</div>
+              <div className="mb-3">
+                {(dashboard?.modelPerformance?.models || []).map((model) => model.model).join(", ") || "No model activity yet"}
+              </div>
+              <div className="text-muted small">Audit export events</div>
+              <div className="fw-semibold">{dashboard?.adminUsage?.total_exports ?? 0}</div>
             </Card.Body>
           </Card>
         </Col>

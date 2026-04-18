@@ -4,7 +4,7 @@ import { FiImage, FiMessageCircle, FiSend } from "react-icons/fi";
 import { apiUrl, getAuthHeader } from "../api";
 
 const MODEL_OPTIONS = [
-  { value: "fast", label: "Fast Model", helper: "Quicker response for screening demos" },
+  { value: "fast", label: "Fast Model", helper: "Quicker response for screening reviews" },
   { value: "deep", label: "Deep Model", helper: "Detailed tumor detection review" },
 ];
 
@@ -514,8 +514,7 @@ export default function DiagnosisChat() {
           <div>
             <h3>Clinical Note</h3>
             <p>
-              This in-app chat is a demo interface that mimics a WhatsApp-style diagnosis workflow
-              while staying fully inside the secured application.
+              This in-app chat runs the same secured diagnosis endpoint as the main MRI workflow.
             </p>
           </div>
         </aside>
