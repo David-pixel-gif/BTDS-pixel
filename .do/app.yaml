@@ -1,0 +1,32 @@
+name: btds-pixel
+region: nyc
+services:
+  - name: web
+    github:
+      repo: David-pixel-gif/BTDS-pixel
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: Dockerfile
+    source_dir: /
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: apps-s-2vcpu-4gb
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 120
+      timeout_seconds: 10
+    envs:
+      - key: SECRET_KEY
+        value: change-this-in-digitalocean
+        scope: RUN_TIME
+        type: SECRET
+      - key: MONGO_URI
+        value: change-this-to-your-mongodb-uri
+        scope: RUN_TIME
+        type: SECRET
+      - key: MONGO_DB_NAME
+        value: brain_tumor_detection
+        scope: RUN_TIME
+      - key: PUBLIC_BASE_URL
+        value: ${web.PUBLIC_URL}
+        scope: RUN_TIME

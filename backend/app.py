@@ -54,6 +54,7 @@ inference_pipeline = InferencePipeline(
 )
 GENERATED_MEDIA_DIR = Path(Config.GENERATED_MEDIA_DIR)
 GENERATED_MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+FRONTEND_BUILD_DIR = Path(Config.FRONTEND_BUILD_DIR)
 
 
 def shutdown_backend(*_args):
@@ -857,8 +858,18 @@ def verify_user_password(user, password):
     return False
 
 
+def frontend_index_path():
+    return FRONTEND_BUILD_DIR / "index.html"
+
+
+def frontend_is_available():
+    return frontend_index_path().exists()
+
+
 @app.route("/")
 def root():
+    if frontend_is_available():
+        return send_from_directory(FRONTEND_BUILD_DIR, "index.html")
     return jsonify({"message": "Brain Tumor Detection API is running"})
 
 
@@ -883,6 +894,11 @@ def endpoints_manifest():
 @app.route("/media/generated/<path:filename>", methods=["GET"])
 def generated_media(filename):
     return send_from_directory(GENERATED_MEDIA_DIR, filename)
+
+
+@app.route("/static/<path:filename>", methods=["GET"])
+def frontend_static(filename):
+    return send_from_directory(FRONTEND_BUILD_DIR / "static", filename)
 
 
 @app.route("/webhooks/whatsapp", methods=["GET"])
@@ -1358,6 +1374,16 @@ def diagnoses(current_user):
         return jsonify({"error": str(exc)}), 400
     except Exception as exc:
         return jsonify({"error": f"Failed to process image: {exc}"}), 500
+
+
+@app.route("/<path:path>", methods=["GET"])
+def frontend_fallback(path):
+    api_prefixes = ("api/", "media/", "webhooks/")
+    if path in {"health", "create_user", "login", "logout", "me", "diagnose", "diagnoses"} or path.startswith(api_prefixes):
+        return jsonify({"error": "Not found"}), 404
+    if frontend_is_available():
+        return send_from_directory(FRONTEND_BUILD_DIR, "index.html")
+    return jsonify({"error": "Frontend build is not available"}), 404
 
 
 if __name__ == "__main__":

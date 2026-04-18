@@ -35,6 +35,10 @@ class Config:
         "GENERATED_MEDIA_DIR",
         str(BASE_DIR / "backend" / "generated_media"),
     )
+    FRONTEND_BUILD_DIR = os.getenv(
+        "FRONTEND_BUILD_DIR",
+        str(BASE_DIR / "frontend" / "build"),
+    )
     PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "")
     FAST_MODEL_NAME = "Fast Model"
     DEEP_MODEL_NAME = "Deep Analysis Model v2"
