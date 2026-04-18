@@ -13,6 +13,28 @@ $backendProcess = $null
 $backendStdoutLog = Join-Path $env:TEMP "btds-backend-stdout.log"
 $backendStderrLog = Join-Path $env:TEMP "btds-backend-stderr.log"
 
+function Import-EnvFile {
+  param([string]$PathValue)
+
+  if (-not (Test-Path $PathValue)) {
+    return
+  }
+
+  foreach ($line in Get-Content $PathValue) {
+    $trimmed = $line.Trim()
+    if (-not $trimmed -or $trimmed.StartsWith("#") -or -not $trimmed.Contains("=")) {
+      continue
+    }
+
+    $name, $value = $trimmed.Split("=", 2)
+    $name = $name.Trim()
+    $value = $value.Trim().Trim('"').Trim("'")
+    if ($name -and -not [Environment]::GetEnvironmentVariable($name, "Process")) {
+      [Environment]::SetEnvironmentVariable($name, $value, "Process")
+    }
+  }
+}
+
 function Is-WindowsAppsShimPath {
   param([string]$PathValue)
 
@@ -240,6 +262,9 @@ function Write-BackendLogs {
 }
 
 try {
+  Import-EnvFile (Join-Path $rootDir ".env")
+  Import-EnvFile (Join-Path $backendDir ".env")
+
   $python = Resolve-PythonCommand
 
   $env:TF_CPP_MIN_LOG_LEVEL = if ($env:TF_CPP_MIN_LOG_LEVEL) { $env:TF_CPP_MIN_LOG_LEVEL } else { "2" }
