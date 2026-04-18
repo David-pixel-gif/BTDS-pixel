@@ -20,11 +20,22 @@ services:
         value: change-this-in-digitalocean
         scope: RUN_TIME
         type: SECRET
-      - key: MONGO_URI
-        value: change-this-to-your-mongodb-uri
+      - key: MYSQL_HOST
+        value: change-this-to-your-mysql-host
         scope: RUN_TIME
         type: SECRET
-      - key: MONGO_DB_NAME
+      - key: MYSQL_PORT
+        value: "3306"
+        scope: RUN_TIME
+      - key: MYSQL_USER
+        value: change-this-to-your-mysql-user
+        scope: RUN_TIME
+        type: SECRET
+      - key: MYSQL_PASSWORD
+        value: change-this-to-your-mysql-password
+        scope: RUN_TIME
+        type: SECRET
+      - key: MYSQL_DATABASE
         value: brain_tumor_detection
         scope: RUN_TIME
       - key: PUBLIC_BASE_URL

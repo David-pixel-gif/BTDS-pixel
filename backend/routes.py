@@ -10,6 +10,6 @@ def legacy_status():
         {
             "message": "Legacy Flask route module retained for compatibility.",
             "active_backend": "backend/app.py",
-            "database": "mongodb",
+            "database": "mysql",
         }
     )

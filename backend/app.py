@@ -25,8 +25,8 @@ LOCAL_SITE_PACKAGES = os.path.join(
 if os.path.isdir(LOCAL_SITE_PACKAGES) and LOCAL_SITE_PACKAGES not in sys.path:
     sys.path.insert(0, LOCAL_SITE_PACKAGES)
 
-from pymongo import ReturnDocument
-from pymongo.errors import DuplicateKeyError, PyMongoError
+from mysql.connector import Error as MySqlError
+from mysql.connector import errorcode
 from flask import Flask, Response, jsonify, request, send_from_directory, session
 from flask_cors import CORS
 from PIL import ImageDraw, ImageFont
@@ -136,7 +136,6 @@ def next_sequence(name):
         {"_id": name},
         {"$inc": {"value": 1}},
         upsert=True,
-        return_document=ReturnDocument.AFTER,
     )
     return result["value"]
 
@@ -1123,9 +1122,9 @@ def create_user():
         inserted = db.users.insert_one(user)
         user["_id"] = inserted.inserted_id
         return jsonify({"message": "User created successfully", "user": public_user(user)}), 201
-    except DuplicateKeyError:
-        return jsonify({"error": "Username or email already exists"}), 409
-    except PyMongoError as exc:
+    except MySqlError as exc:
+        if getattr(exc, "errno", None) == errorcode.ER_DUP_ENTRY:
+            return jsonify({"error": "Username or email already exists"}), 409
         return jsonify({"error": f"Database error while creating user: {exc}"}), 500
     except Exception as exc:
         return jsonify({"error": f"Failed to create user: {exc}"}), 500
@@ -1153,7 +1152,7 @@ def login():
                 "userRole": roles[0] if roles else None,
             }
         )
-    except PyMongoError as exc:
+    except MySqlError as exc:
         return jsonify({"error": f"Database error while logging in: {exc}"}), 500
     except Exception as exc:
         return jsonify({"error": f"Failed to log in: {exc}"}), 500

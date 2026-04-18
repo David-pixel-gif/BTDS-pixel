@@ -15,8 +15,11 @@ def _read_labels_file(path: Path) -> str | None:
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
     TOKEN_MAX_AGE_SECONDS = int(os.getenv("TOKEN_MAX_AGE_SECONDS", "3600"))
-    MONGO_URI = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017")
-    MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "brain_tumor_detection")
+    MYSQL_HOST = os.getenv("MYSQL_HOST", "127.0.0.1")
+    MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
+    MYSQL_USER = os.getenv("MYSQL_USER", "root")
+    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
+    MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "brain_tumor_detection")
     TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
     TWILIO_VALIDATE_SIGNATURE = os.getenv("TWILIO_VALIDATE_SIGNATURE", "true").lower() not in {"0", "false", "no"}

@@ -1,7 +1,7 @@
 {
   "name": "streamline-app",
   "version": "1.0.0",
-  "description": "Brain tumor detection system with a React frontend and Mongo-backed Flask API",
+  "description": "Brain tumor detection system with a React frontend and MySQL-backed Flask API",
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"npm --prefix frontend run frontend\" \"npm run backend\"",
@@ -21,7 +21,6 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.3",
     "glightbox": "^3.3.0",
-    "mongoose": "^8.8.0",
     "nodemon": "^3.0.2",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.5",
